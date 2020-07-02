@@ -1,13 +1,10 @@
 package s3sync
 
 import (
-	"os"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gdanko/golang-s3sync/pkg/s3diff"
-	"github.com/kr/pretty"
 
 	"fmt"
 )
@@ -35,10 +32,10 @@ var (
 )
 
 func (s *Syncer) Sync() error {
-	// err = s.validate()
-	// if err != nil {
-	// 	return err
-	// }
+	err = s.validate()
+	if err != nil {
+		return err
+	}
 
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String(s.Region),
@@ -60,37 +57,8 @@ func (s *Syncer) Sync() error {
 	}
 
 	s.init()
-
 	s.Differ.Diff()
-
-	return nil
-}
-
-func (s *Syncer) validate() error {
-	// errorList := []string
-	if s.ACL == "" {
-		s.ACL = "private"
-	}
-
-	if s.Destination == "" {
-		return fmt.Errorf("the Destination option is required")
-	}
-
-	if s.MaxThreads == 0 {
-		s.MaxThreads = 12
-	}
-
-	if s.Profile == "" {
-		s.Profile = "default"
-	}
-
-	if s.Region == "" {
-		return fmt.Errorf("the Region option is required")
-	}
-
-	if s.Source == "" {
-		return fmt.Errorf("the Source option is required")
-	}
+	s.Differ.GenerateSyncList()
 
 	return nil
 }
@@ -114,11 +82,4 @@ func (s *Syncer) init() error {
 	}
 
 	return nil
-}
-
-func prettyPrint(item interface{}, exit bool) {
-	pretty.Print(item)
-	if exit == true {
-		os.Exit(0)
-	}
 }
