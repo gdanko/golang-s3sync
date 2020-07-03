@@ -29,6 +29,7 @@ type SyncItem struct {
 	Key         string
 	MD5         string
 	Message     string
+	Path        string
 	Size        int64
 }
 
@@ -187,7 +188,7 @@ func (d *Differ) getLocalFiles(path string, fileList *map[string]FileInfo) {
 				(*fileList)[strippedKey] = FileInfo{
 					Key:       strippedKey,
 					Directory: info.IsDir(),
-					Path:      path,
+					Path:      item,
 					Dirname:   filepath.Dir(path),
 					Filename:  filepath.Base(path),
 					Size:      info.Size(),
@@ -214,10 +215,13 @@ func (d *Differ) getS3Files(path string, bucket string, fileList *map[string]Fil
 	for _, fileObj := range resp.Contents {
 		key := *fileObj.Key
 		if !strings.HasSuffix(key, string(os.PathSeparator)) && int64(*fileObj.Size) != 0 {
-			(*fileList)[key] = FileInfo{
+			key := filepath.Join(filepath.Dir(key), filepath.Base(key))
+			strippedKey := strings.Join(strings.Split(key, string(os.PathSeparator))[1:], string(os.PathSeparator))
+
+			(*fileList)[strippedKey] = FileInfo{
+				Key:      key,
 				Dirname:  filepath.Dir(key),
 				Filename: filepath.Base(key),
-				Key:      filepath.Join(filepath.Dir(key), filepath.Base(key)),
 				Size:     int64(*fileObj.Size),
 				MD5:      strings.ReplaceAll(*fileObj.ETag, "\"", ""),
 			}
@@ -291,7 +295,10 @@ func (d *Differ) GenerateSyncList() {
 func (d *Differ) getSyncItem(sourceFile string) SyncItem {
 	relativePath, _ := filepath.Rel(d.Source, sourceFile)
 	return SyncItem{
-		Source:      sourceFile,
-		Destination: filepath.Join(d.Destination, relativePath),
+		Source: sourceFile,
+		// Destination: filepath.Join(d.Destination, relativePath),
+		// filepath.Join converts s3:// to s3:/
+		// will fix later
+		Destination: d.Destination + "/" + relativePath,
 	}
 }
