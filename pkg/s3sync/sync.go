@@ -17,24 +17,25 @@ import (
 	"fmt"
 )
 
+// Syncer holds information about how to sync
 type Syncer struct {
-	ACL          string
-	Debug        bool
-	Delete       bool
-	Destination  string
-	Differ       *s3diff.Differ
-	Downloader   *s3manager.Downloader
-	Dryrun       bool
-	MaxThreads   int
-	Profile      string
-	Region       string
-	Source       string
-	SourceBucket string
-	S3           *s3.S3
-	Uploader     *s3manager.Uploader
-	Verify       bool
+	ACL         string
+	Debug       bool
+	Delete      bool
+	Destination string
+	Differ      *s3diff.Differ
+	Downloader  *s3manager.Downloader
+	Dryrun      bool
+	MaxThreads  int
+	Profile     string
+	Region      string
+	Source      string
+	S3          *s3.S3
+	Uploader    *s3manager.Uploader
+	Verify      bool
 }
 
+// SyncOuput will hold the output information for each synced item
 type SyncOutput struct {
 	Message string
 	Status  string
@@ -46,6 +47,7 @@ var (
 	sess  *session.Session
 )
 
+// Sync initializes the Differ, triggers the diff, and performs the sync
 func (s *Syncer) Sync() error {
 	err = s.validate()
 	if err != nil {

@@ -11,6 +11,7 @@ import (
 	"github.com/thoas/go-funk"
 )
 
+// FileInfo represents the information about a given file in file lists
 type FileInfo struct {
 	Directory bool
 	Dirname   string
@@ -21,6 +22,7 @@ type FileInfo struct {
 	Size      int64
 }
 
+// SyncItem represents info about an item needing to be synced
 type SyncItem struct {
 	Action      string
 	Source      string
@@ -33,6 +35,7 @@ type SyncItem struct {
 	Size        int64
 }
 
+// Differ holds all the diff information
 type Differ struct {
 	Common                 map[string]FileInfo
 	Debug                  bool
@@ -61,6 +64,7 @@ var (
 	md5sum string
 )
 
+// DetermineTypes determines whether the specified path is local or in s3 and configures parts of the Differ
 func (d *Differ) DetermineTypes() error {
 	var (
 		err error
@@ -107,6 +111,7 @@ func (d *Differ) DetermineTypes() error {
 	return nil
 }
 
+// Diff looks at the files on both sides and populates several file lists, determining what to sync
 func (d *Differ) Diff() {
 	var (
 		name string
