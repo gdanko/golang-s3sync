@@ -36,6 +36,10 @@ func (s *Syncer) validate() error {
 	return nil
 }
 
+func dryrun(message string) {
+	fmt.Printf("[DRYRUN] %s\n", message)
+}
+
 func prettyPrint(item interface{}, exit bool) {
 	pretty.Print(item)
 	if exit == true {
